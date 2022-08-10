@@ -1,15 +1,27 @@
 import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from "react-redux";
+import {add} from "../store/cartSlice";
+import {getProducts, STATUS} from "../store/productSlice";
 
 const Products = (props) => {
-    const [products, setProducts] = useState([]);
+    const dispatch = useDispatch();
+    const {data: products, status} = useSelector((state) => state.products)
     useEffect(() => {
-        const fetchProducts = async () => {
-            const res = await fetch('https://fakestoreapi.com/products');
-            const data = await res.json();
-            setProducts(data);
-        }
-        fetchProducts();
+            dispatch(getProducts());
     }, []);
+
+    const handleAddToCart = (product) => {
+     dispatch(add(product));
+    }
+
+    if(status === STATUS.LOADING){
+        return <h2>Loading...</h2>
+    }
+
+    if(status === STATUS.ERROR){
+        return <h2>Something went wrong!</h2>
+    }
+
     return (
         <div className="productsWrapper">
             {products.map(product => (
@@ -17,7 +29,7 @@ const Products = (props) => {
                     <img src={product.image} alt={product.title}/>
                     <h4>{product.title}</h4>
                     <h5>{product.price}</h5>
-                    <button className="btn">Add to cart</button>
+                    <button className="btn" onClick={() => handleAddToCart(product)}>Add to cart</button>
                 </div>
             ))}
         </div>
